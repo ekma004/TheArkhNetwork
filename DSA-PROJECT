@@ -1,0 +1,562 @@
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class SocialNetwork {
+    public static void main(String args[])  {
+        Network network = new Network(10);
+        network.welcomeMessage();
+    }
+}
+/** PERSON CLASS ALL THE USER INFO STORES*/
+class Person {
+    String userid;
+    private String name;
+    private String bDay;
+    private String password;
+
+    Person() {
+    }
+
+    Person(String userid, String name, String password) {
+        this.userid = userid;
+        setName(name);
+        setPassword(password);
+
+    }
+
+    public Person(String userid, String name, String bDay, String password) {
+        super();
+        this.userid = userid;
+        setName(name);
+        setbDay(bDay);
+        setPassword(password);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getbDay() {
+        return bDay;
+    }
+
+    public void setbDay(String bDay) {
+        this.bDay = bDay;
+    }
+
+}
+
+/** NETWORK CLASS ALL THE METHODOLOGY EXECUTES HERE */
+class Network {
+
+    Scanner input = new Scanner(System.in);
+    String Userid, PW = null;
+    int connec[][];
+    ArrayList<String> people_userid;
+    ArrayList<String> people_name;
+    ArrayList<String> people_password;
+    ArrayList<String> people_message;
+    ArrayList<String> people_bDay;
+
+
+    Network(int size) {
+        connec = new int[size][size];
+        people_userid = new ArrayList<>(size);
+        people_name = new ArrayList<>(size);
+        people_password = new ArrayList<>(size);
+        people_message = new ArrayList<>(size);
+        people_bDay = new ArrayList<>(size);
+
+        for (int i = 0; i < connec.length; i++) {
+            for (int j = 0; j < connec[i].length; j++) {
+                connec[i][j] = 0;
+            }
+        }
+    }
+
+    void addPersonsHardCoded() {
+        addPerson("muneeb", "Muneeb", "31-12-2000", "muneeb086");
+        addPerson("saad", "Saad Iqbal", "19-10-2000", "saad006");
+        addPerson("ekma", "Arslan", "03-01-2000", "ekma004");
+        garbageMessages();
+    }
+
+    void garbageMessages() {
+
+        for (int i = 0; i < people_name.size(); i++) {
+            people_message.add(i, "");
+        }
+    }
+
+    boolean addPerson(String userid, String name, String bDay, String password) {
+        Person person = new Person(userid, name, bDay, password);
+        people_userid.add(person.userid);
+        people_name.add(name);
+        people_password.add(password);
+        people_bDay.add(bDay);
+        people_message.add("");
+        return true;
+    }
+    /** ALGORITHMS */
+
+    //MAKING EDGE B\W TWO VERTEX
+    boolean addConnection(String p1, String p2) {
+        int ind1 = people_userid.indexOf(p1);
+        int ind2 = people_userid.indexOf(p2);
+        if (ind1 != -1 && ind2 != -1) {
+            connec[ind1][ind2] = 1;
+            connec[ind2][ind1] = 1;
+            return true;
+        }
+        return false;
+    }
+
+    //MAKING A DIRECTED EDGE B\W TWO EDGES
+    int halfConnection(String requester, String person) {
+        int index1 = people_userid.indexOf(requester);
+        int index2 = people_userid.indexOf(person);
+        if (index1 != -1 && index2 != -1) {
+            connec[index1][index2] = 2;
+            return index1;
+        }
+        return 0;
+    }
+
+    //REMOVING EDGE B\W TWO VERTEX
+    boolean removeConnection(String p1, String p2) {
+        int ind1 = people_userid.indexOf(p1);
+        int ind2 = people_userid.indexOf(p2);
+        if (ind1 != -1 && ind2 != -1) {
+            connec[ind1][ind2] = 0;
+            connec[ind2][ind1] = 0;
+            return true;
+        }
+        return false;
+    }
+
+    //USING ADJACENCY MATRIX (2D-ARRAY) FOR CHECKING THE EDGE B\W THE TWO VERTEX
+    boolean isAdjacent(String v1, String v2) {
+        int index1 = people_userid.indexOf(v1);
+        int index2 = people_userid.indexOf(v2);
+        return connec[index1][index2] == 1;
+    }
+
+    //BLOCKING THE USER BY PUTTING -1 IN MATRIX
+    boolean block(String p1, String p2) {
+        int index1 = people_userid.indexOf(p1);
+        int index2 = people_userid.indexOf(p2);
+        if (index1 != -1 && index2 != -1) {
+            connec[index1][index2] = -1;
+            return true;
+        }
+        return false;
+    }
+
+    /** LINKING METHODS */      /** REQUIRED FEATURES */
+    //FOR SENDING MESSAGES
+    void sendMessage() {
+
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("Enter the USER-ID of Recepient: ");
+        String muid = input.next();
+
+        if (userExists(muid)) {
+            int index1 = people_userid.indexOf(muid);
+            int index2 = people_userid.indexOf(Userid);
+            if (isReachable(Userid, muid)) {
+                System.out.println("Enter the Message: ");
+                String message = input.next();
+                people_message.add(index1, message);
+                System.out.println(">>>>MESSAGE SEND SUCCESSFULLY<<<<<");
+                menu();
+
+            } else {
+                System.out.println("->You are not Friends on The Arkh Network<-");
+                System.out.println("Would you Like to send the Friend Request to <" + muid + "> ? [Y/N]");
+                String choice = input.next();
+                if (choice.equals("Y") || choice.equals("y") ) {
+                    friend();
+                } else {
+                    menu();
+                }
+            }
+
+        } else {
+            System.out.println(">>>>>>>>>>USER-Not-EXISTS<<<<<<<<<<");
+            menu();
+        }
+    }
+
+    //FOR SHOWING MESSAGES
+    void showMessage(String uid) {
+        System.out.println("Enter the USER-ID of Friend: ");
+        Scanner mess = new Scanner(System.in);
+        String mid = mess.next();
+
+        if (userExists(mid)) {
+            if (isReachable(Userid, mid)) {
+                int ind = people_userid.indexOf(Userid);
+                System.out.println(people_message.get(ind));
+
+            }
+
+        } else {
+            System.out.println(">>>>>>>>>>USER-Not-EXISTS<<<<<<<<<<");
+            menu();
+        }
+
+    }
+
+    //FOR ADDING FRIENDS
+    void friend() {
+        System.out.println("-->Enter the USER-ID:");
+        String uid = input.next();
+        if (userExists(uid)) {
+            halfConnection(Userid, uid);
+            System.out.println(">>>>>>>>>>SUCCESSFUL<<<<<<<<<<");
+            menu();
+        } else {
+            System.out.println(">>>>>>>>>>USER-Not-EXISTS<<<<<<<<<<");
+            menu();
+        }
+    }
+
+    //FOR UNFRIENDING USER
+    void unfriend() {
+        System.out.println("-->Enter the USER-ID:");
+        String uid2 = input.next();
+        if (userExists(uid2)) {
+            removeConnection(Userid, uid2);
+            System.out.println(">>>>>>>>>>SUCCESSFUL<<<<<<<<<<");
+            menu();
+
+        } else {
+            System.out.println(">>>>>>>>>>USER-Not-EXISTS<<<<<<<<<<");
+            menu();
+        }
+    }
+
+    //FOR BLOCKING USER
+    boolean blockFriend() {
+        System.out.println("-->Enter the USER-ID:");
+        String uid3 = input.next();
+        if (userExists(uid3)) {
+            block(Userid, uid3);
+            return true;
+
+        } else {
+            System.out.println(">>>>>>>>>>USER-Not-EXISTS<<<<<<<<<<");
+            menu();
+
+        }
+        return false;
+    }
+
+    //FOR PRINTING FRIENDS LIST
+    void printFriendsList(String user_id) {
+        System.out.println("Friends:");
+        for (int i = 0; i < people_userid.size(); i++) {
+            if (isReachable(user_id, people_userid.get(i)) == true) {
+                System.out.print(people_name.get(i) + " \n");
+            }
+        }
+    }
+
+    //FOR SHOWING REQUESTS OF FRIENDS
+    void friendRequests() {
+        int fIndex = 0;
+        System.out.println("Friend Requests:: ");
+        for (int i = 0; i < connec.length; i++) {
+            for (int j = 0; j < connec[i].length; j++) {
+                if (connec[i][j] == 2) {
+                    System.out.println(people_userid.get(i));
+                }
+            }
+        }
+        System.out.println(">>>>Accept Fiend Requests<<<<");
+        acceptRequest();
+    }
+
+    //FOR ACCEPTING FRIEND REQUEST
+    void acceptRequest() {
+        System.out.println("Enter the User-ID: ");
+        String fReq = input.next();
+        if (userExists(fReq)) {
+            if (halfConnection(fReq, Userid) > 0) {
+                addConnection(Userid, fReq);
+
+            } else {
+                System.out.println("NO-FRIEND REQUEST FOUND!");
+                menu();
+            }
+        } else {
+            System.out.println(">>>>>>>>>>USER-Not-EXISTS<<<<<<<<<<");
+            menu();
+        }
+    }
+
+    /** INTERFACE OF ARKH */
+    //SALUTATION
+    void welcomeMessage() {
+        addPersonsHardCoded();
+        System.out.println("////////////////////////////");
+        System.out.println("/         WELCOME          /");
+        System.out.println("/            TO            /");
+        System.out.println("/     THE ARKH NETWORK     /");
+        System.out.println("////////////////////////////");
+        System.out.println();
+        sign();
+    }
+
+    //FOR SHOWING SIGNING OPTION
+    void sign() {
+        System.out.println("SIGN IN(1)        SIGN UP(2)");
+        System.out.print("::>");
+        int choice = input.nextInt();
+        if (choice == 2) {
+            signUp();
+        } else if (choice == 1) {
+            signIn();
+        } else {
+            System.exit(-1);
+        }
+
+    }
+
+    //FOR SIGNING IN THE ARKH NETWORK
+    void signIn() {
+        System.out.print("UserId:");
+        String id = input.next();
+        System.out.print("Password:");
+        String pass = input.next();
+
+        for (int i = 0; i < people_userid.size(); i++) {
+            if (people_userid.get(i).equals(id)) {
+                Userid = id;
+                if (people_password.get(i).equals(pass)) {
+                    PW = pass;
+                    menu();
+                } else {
+                    System.out.println(">>>>>Incorrect UserId or Password<<<<<\n");
+                    forgetPassword();
+                    signIn();
+                }
+            }
+        }
+        System.out.println(">>>No User Exist<<<");
+        sign();
+    }
+
+    //FOR PASSWORD RESETTING (IF USER FORGETS THE PASSWORD)
+    void forgetPassword() {
+        Scanner user = new Scanner(System.in);
+        System.out.println("Forget Password??? [Y/N]");
+        String fAsk = user.next();
+
+        if (fAsk.equals("y") || fAsk.equals("Y")) {
+
+            System.out.println("Enter User Id:");
+            String fPass = user.next();
+            if (userExists(fPass)) {
+                System.out.println("Please enter your BirthDay [dd-mm-yyyy]:");
+                String fBDay = user.next();
+                int fIndex = people_userid.indexOf(fPass);
+                if (fBDay.equals(people_bDay.get(fIndex))) {
+                    password(fIndex);
+                }
+
+            }
+        } else {
+            sign();
+        }
+    }
+
+    //FOR SIGNING UP TO ARKH NETWORK
+    void signUp() {
+
+        System.out.print("Enter Your First Name:");
+        String fName = input.next();
+        System.out.print("Enter Your Last Name:");
+        String lName = input.next();
+        System.out.print("Enter Your Date of Birth(dd-mm-yyyy):");
+        String bDay = input.next();
+
+        people_name.add(fName + lName);
+        people_bDay.add(bDay);
+        System.out.println("Enter User ID");
+        System.out.println("Suggestions: " + fName + "001  " + fName + "181  " + lName + "100  " + lName + "242  ");
+        System.out.print("->");
+        String userId = input.next();
+        people_userid.add(userId);
+
+        while (true) {
+            System.out.print("Enter Password:");
+            String pass1 = input.next();
+            System.out.print("Confirm Password:");
+            String pass2 = input.next();
+            if (pass1.equals(pass2)) {
+                System.out.println(">>>>SuccessFully Registered to Arkh Network<<<<");
+                people_password.add(pass2);
+                sign();
+                break;
+            } else
+                System.out.println("Password don't Match");
+        }
+    }
+
+    //THE MOST IMPORTANT METHOD >>MENU<< IT IS THE MAIN JOINT OF THIS CODE WHERE ALL THE METHODS ARE LINKED IN THEIR OWN WAY
+    void menu() {
+        Scanner user = new Scanner(System.in);
+        System.out.println("\n////////////////////////////////////////////////////////////////");
+        System.out.println("/ Profile(1)   Friend(2)   Messages(3)   LogOut(PRESS ANY KEY) /");
+        System.out.println("////////////////////////////////////////////////////////////////");
+        int option = getIntInput();
+
+        if (option == 1) { //OPTION OF VIEWING PROFILE
+            int index = people_userid.indexOf(Userid);
+
+            //DETAILS OF USER
+            System.out.println("Name: " + people_name.get(index));
+            System.out.println("User-ID: " + people_userid.get(index));
+            System.out.println("Birthday: " + people_bDay.get(index));
+
+            //PASSWORD MENU
+            System.out.println("\n-----------------------------------------------------------------");
+            System.out.println("View Password(1)    Change PW(2)    Return to Menu(PRESS ANY KEY)");
+            System.out.println("-----------------------------------------------------------------");
+            int pw_Choice = getIntInput();
+            if (pw_Choice == 1) {  //OPTION VIEWING PASSWORD
+                System.out.println(">>>" + people_password.get(index) + "<<<");
+                menu();
+
+            } else if (pw_Choice == 2) {  //OPTION OF CHANGING PASSWORD
+                System.out.println("Enter previous password: ");
+                String prev_pw = user.next();
+
+                if (prev_pw.equals(people_password.get(index))) {
+                    System.out.println("Enter new Password: ");
+                    String new_pw = user.next();
+                    people_password.add(index, new_pw);
+                    System.out.println("PASSWORD UPDATED SUCCESSFULLY!");
+                }
+            }
+
+            menu(); //BACK TO MENU
+
+        } else if (option == 2) { //FRIENDS OPTIONS
+
+            while (true) {
+                System.out.println("\n--------------------------------------------------------------------------------------------------------------------");
+                System.out.println("Friends List(1)     Add Friend(2)     UnFriend(3)     Block Friend(4)     Friend Requests(5)     Cancel(PRESS ANY KEY)");
+                System.out.println("----------------------------------------------------------------------------------------------------------------------");
+
+                int option2 = getIntInput();
+
+                if (option2 == 1) {
+                    printFriendsList(Userid);
+
+                } else if (option2 == 2) {
+                    friend();
+
+                } else if (option2 == 3) {
+                    unfriend();
+
+                } else if (option2 == 4) {
+                    blockFriend();
+
+                } else if (option2 == 5) {
+                    friendRequests();
+                } else {
+                    menu();
+                    break;
+                }
+            }
+
+        } else if (option == 3) { //MESSAGES OPTION
+            System.out.println("Send Message(1)     View Message(2)");
+
+            int opt = getIntInput();
+            if (opt == 1) {
+                sendMessage();
+            } else if (opt == 2) {
+                showMessage(Userid);
+                menu();
+            }
+
+        } else { //LOGGED OUT
+            System.out.println(">>>>>SuccessFully Logged Out<<<<<\n");
+            sign();
+        }
+    }
+
+    //SOME HELPING METHODS
+    //GETTING USER INPUT THROUGH EXCEPTION HANDLING
+    public static int getIntInput() {
+        Scanner userInput = new Scanner(System.in);
+        int opts = 100;
+        System.out.print("::> ");
+        //TRY-CATCH EXCEPTION HANDLINGS
+        try {
+            opts = Integer.parseInt(userInput.nextLine());
+        } catch (RuntimeException exp) {
+            System.out.println(">>>>EXCEPTION ENCOUNTERED<<<<<");
+            System.out.println("->Only use Digits<-");
+        } finally {
+            return opts;
+        }
+    }
+
+    //CHECKS IF THE USER ID ENTERED IF ITS IN OUR RECORDS
+    boolean userExists(String user) {
+        for (int i = 0; i < people_userid.size(); i++) {
+            if (user.equals(people_userid.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //CHECKS IF VERTEX-1 HAS EDGE WITH VERTEX-2
+    boolean isReachable(String v1, String v2) {
+        return isAdjacent(v1, v2) == true;
+    }
+
+    //USED FOR RESETING THE PASSWORD AT SIGN-IN
+    void password(int index) {
+
+        Scanner user = new Scanner(System.in);
+        System.out.println("\n-----------------------------------------------------------------");
+        System.out.println("View Password(1)    Change PW(2)    Return to Menu(PRESS ANY KEY)");
+        System.out.println("-----------------------------------------------------------------");
+        int pw_Choice = getIntInput();
+        if (pw_Choice == 1) {                                                                //VIEW PASSWORD
+            System.out.println(">>>" + people_password.get(index) + "<<<");
+
+        } else if (pw_Choice == 2) {                                                        //CHANGE PASSWORD
+            System.out.println("Enter previous password: ");
+            String prev_pw = user.next();
+
+            if (prev_pw.equals(people_password.get(index))) {
+                System.out.println("Enter new Password: ");
+                String new_pw = user.next();
+                people_password.add(index, new_pw);
+                System.out.println("PASSWORD UPDATED SUCCESSFULLY!");
+            }
+        }
+        sign();
+    }
+}
